@@ -319,7 +319,9 @@ var battle = execMain(function() {
 				var curTime = playerSolves[curSolveId];
 				var meanSum = 0;
 				var meanCount = 0;
+				var solveCount = 0;
 				for (var solveId in playerSolves) {
+					solveCount++;
 					var solveTime = playerSolves[solveId][0];
 					if (solveTime[0] == -1) {
 						continue;
@@ -327,7 +329,7 @@ var battle = execMain(function() {
 					meanSum += solveTime[0] + solveTime[1];
 					meanCount++;
 				}
-				var meanTime = meanCount ? stats.pretty([0, meanSum / meanCount], false) : 'N/A';
+				var meanTime = (meanCount ? stats.pretty([0, meanSum / meanCount], false) : 'N/A') + ' (' + solveCount + ')';
 				var isSolved = player['status'] == 'SOLVED';
 				var lastTime = (solveDict[player['accountId']] || {})[curSolveId - 1];
 				lastTime = isSolved ? curTime : lastTime;
