@@ -16,6 +16,7 @@ execMain(function() {
 	function init(device) {
 		clear();
 		_deviceName = device.name;
+		console.log('[moyucube][debug] init', _deviceName, navigator.userAgent);
 		return device.gatt.connect().then(function(gatt) {
 			_gatt = gatt;
 			return gatt.getPrimaryService(SERVICE_UUID);
@@ -32,9 +33,12 @@ execMain(function() {
 			_chrct_read.addEventListener('characteristicvaluechanged', onReadEvent);
 			_chrct_turn.addEventListener('characteristicvaluechanged', onTurnEvent);
 			_chrct_gyro.addEventListener('characteristicvaluechanged', onGyroEvent);
-			_chrct_read.startNotifications();
-			_chrct_turn.startNotifications();
-			_chrct_gyro.startNotifications();
+			console.log('[moyucube][debug] starting notifications', _chrct_read.uuid, _chrct_turn.uuid, _chrct_gyro.uuid);
+			return Promise.all([
+				_chrct_read.startNotifications().then(function(ret) { console.log('[moyucube][debug] read notifications started'); return ret; }),
+				_chrct_turn.startNotifications().then(function(ret) { console.log('[moyucube][debug] turn notifications started'); return ret; }),
+				_chrct_gyro.startNotifications().then(function(ret) { console.log('[moyucube][debug] gyro notifications started'); return ret; })
+			]);
 		});
 	}
 
@@ -46,16 +50,19 @@ execMain(function() {
 
 	function onReadEvent(event) {
 		var value = event.target.value;
+		console.log('[moyucube][debug] read event', value && value.byteLength, value);
 		giikerutil.log('[moyucube] Received read event', value);
 	}
 
 	function onGyroEvent(event) {
 		var value = event.target.value;
+		console.log('[moyucube][debug] gyro event', value && value.byteLength, value);
 		giikerutil.log('[moyucube] Received gyro event', value);
 	}
 
 	function onTurnEvent(event) {
 		var value = event.target.value;
+		console.log('[moyucube][debug] turn event', value && value.byteLength, value);
 		giikerutil.log('[moyucube] Received turn event', value);
 		parseTurn(value);
 	}
