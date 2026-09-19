@@ -276,7 +276,7 @@ var battle = execMain(function() {
 		roomTable.empty();
 		var titles = TOOLS_BATTLE_TITLE.split('|').slice(0, 3);
 		titles.splice(1, 0, 'ELO');
-		titles.push('Mean');
+		titles.push(STATS_AVG);
 
 		roomTable.append($('<tr>').append($('<td colspan=6>').append(headStr[0] + ': ', joinRoomSpan, '&nbsp;', leaveRoomSpan)));
 		roomTable.append('<tr><td colspan=2>' + titles.join('</td><td>') + '</td></tr>');
