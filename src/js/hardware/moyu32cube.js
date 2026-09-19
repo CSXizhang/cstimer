@@ -207,6 +207,7 @@ execMain(function() {
 		clear();
 		deviceName = device.name.trim();
 		giikerutil.log('[Moyu32Cube] start init device');
+		console.log('[Moyu32Cube][debug] init', deviceName, navigator.userAgent);
 		return GiikerCube.waitForAdvs().then(function(mfData) {
 			var dataView = getManufacturerDataBytes(mfData);
 			if (dataView && dataView.byteLength >= 6) {
@@ -239,7 +240,11 @@ execMain(function() {
 				return Promise.reject('[Moyu32Cube] Cannot find required characteristics');
 			}
 			_chrct_read.addEventListener('characteristicvaluechanged', onStateChanged);
-			return _chrct_read.startNotifications();
+			console.log('[Moyu32Cube][debug] starting notifications', _chrct_read.uuid);
+			return _chrct_read.startNotifications().then(function(ret) {
+				console.log('[Moyu32Cube][debug] notifications started', _chrct_read.uuid);
+				return ret;
+			});
 		}).then(function () {
 			initMac(true);
 			return requestCubeInfo();
@@ -252,6 +257,7 @@ execMain(function() {
 
 	function onStateChanged(event) {
 		var value = event.target.value;
+		console.log('[Moyu32Cube][debug] characteristicvaluechanged', value && value.byteLength, value);
 		if (decoder == null) {
 			return;
 		}
@@ -274,6 +280,7 @@ execMain(function() {
 
 	function parseData(value) {
 		var locTime = $.now();
+		console.log('[Moyu32Cube][debug] parseData', value && value.byteLength);
 		value = decode(value);
 		for (var i = 0; i < value.length; i++) {
 			value[i] = (value[i] + 256).toString(2).slice(1);
