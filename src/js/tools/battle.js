@@ -174,6 +174,8 @@ var battle = execMain(function() {
 			'accountId': compId
 		}).then(conn.close, conn.close);
 		roomInfo = null;
+		observedSolves = {};
+		observedRoomId = null;
 		renderRoom();
 		resetHeartBeat();
 	}
@@ -231,6 +233,8 @@ var battle = execMain(function() {
 	var roomId;
 	var compId;
 	var roomInfo;
+	var observedSolves = {};
+	var observedRoomId = null;
 	var toStart = false;
 	var localLastSolve = [[-1, 1], null];
 
@@ -242,6 +246,8 @@ var battle = execMain(function() {
 			}
 		} else {
 			roomInfo = null;
+			observedSolves = {};
+			observedRoomId = null;
 			if (kernel.getProp('scrType') == 'remoteBattle') {
 				kernel.pushSignal('ctrl', ['scramble', 'next']);
 			}
@@ -254,6 +260,17 @@ var battle = execMain(function() {
 	function onRoomInfo() {
 		if (!roomInfo) {
 			return;
+		}
+		if (observedRoomId != roomInfo['roomId']) {
+			observedSolves = {};
+			observedRoomId = roomInfo['roomId'];
+		}
+		var roomSolves = roomInfo['solves'] || [];
+		for (var i = 0; i < roomSolves.length; i++) {
+			var solveObj = roomSolves[i];
+			var accountId = solveObj['accountId'];
+			observedSolves[accountId] = observedSolves[accountId] || {};
+			observedSolves[accountId][solveObj['solveId']] = [solveObj['time'], solveObj['soltime']];
 		}
 		if (roomInfo['cur'][1] && roomInfo['cur'][1] != localLastSolve[1]) {
 			scrResolve && scrResolve(['$T333$' + roomInfo['cur'][1]]);
@@ -316,13 +333,14 @@ var battle = execMain(function() {
 					account = account.slice(0, 4) + '...' + account.slice(account.length - 3);
 				}
 				var playerSolves = solveDict[player['accountId']] || {};
+				var playerObservedSolves = observedSolves[player['accountId']] || {};
 				var curTime = playerSolves[curSolveId];
 				var meanSum = 0;
 				var meanCount = 0;
 				var solveCount = 0;
-				for (var solveId in playerSolves) {
+				for (var solveId in playerObservedSolves) {
 					solveCount++;
-					var solveTime = playerSolves[solveId][0];
+					var solveTime = playerObservedSolves[solveId][0];
 					if (solveTime[0] == -1) {
 						continue;
 					}
